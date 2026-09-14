@@ -41,6 +41,7 @@ class NameHashGenerator:
         self.input_files_count: int = 0
         self.input_hashes_count: int = 0
         self.input_hashes_resolved: int = 0
+        self.latest_rowstruct: Optional[str] = None
 
     def run(self) -> Dict[str, str]:
         t0 = time.time()
@@ -76,6 +77,7 @@ class NameHashGenerator:
         print("\n[4/6] Resolving Standard UE4 Engine Reflection...")
         ue_resolver = UEResolver(self.ue4_reference_path)
         ue_resolved = ue_resolver.resolve_engine_structs(latest_structs)
+        self.latest_rowstruct = next((k for k, v in ue_resolved.items() if v == "RowStruct"), None)
         print(f"      Resolved {len(ue_resolved)} properties via UE4 Engine Reflection.")
 
         print("\n[5/6] Performing Multi-SDK Structural Diffing & Lineage Tracking...")
@@ -208,7 +210,7 @@ class NameHashGenerator:
             f"Tracked Lineage Records:    {len(self.lineage_records)}",
             f"Input Files Scanned:        {self.input_files_count}",
             f"Input Hashes Resolved:      {self.input_hashes_resolved}",
-            f"RowStruct Hash (Latest):    {rowstruct_latest[0] if rowstruct_latest else 'NOT FOUND'}",
+            f"RowStruct Hash (Latest):    {self.latest_rowstruct or (rowstruct_latest[0] if rowstruct_latest else 'NOT FOUND')}",
             f"RowStruct Hashes (All):     {', '.join(rowstruct_all) if rowstruct_all else 'NOT FOUND'}",
             "=" * 60,
             "STATUS: COMPLETED SUCCESSFULLY",
